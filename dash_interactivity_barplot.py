@@ -28,3 +28,26 @@ app.layout = html.Div(children=[html.H1("Total number of flights to the destinat
                                 ])
 
 # Add Callback Decorator
+@app.callback(Output(component_id='bar-plot', component_property='figure'),
+              Input(component_id='input-year', component_property='value'))
+
+# Define Callback graph function
+def get_graph(entered_year):
+        df = airline_data[airline_data['Year'] == int(entered_year)]
+        bar_data = df.groupby('DestState')['Flights'].sum().reset_index()
+        bar_data = bar_data.sort_values('Flights', ascending=False)
+        fig = px.bar(bar_data, x='DestState', y='Flights', title='Total number of flights to the destination state split by reporting airline')
+        fig.update_layout(
+                title=f'Flights to Destination State in {entered_year}', 
+                xaxis_title='Destination State', 
+                yaxis_title='Number of Flights'
+                )
+        fig.update_traces(
+                text=bar_data['Flights'],
+                textposition='outside'
+        )
+        return fig
+
+# For runninf the app
+if __name__ == '__main__':
+        app.run_server()
